@@ -64,6 +64,20 @@ class TestImageMatrices:
         matrices = {name: _matrix_of(name) for name in _MATRIX_WORKFLOWS}
         assert len({frozenset(m) for m in matrices.values()}) == 1, matrices
 
+    def test_only_the_canonical_workflow_publishes_container_images(self):
+        publishers = sorted(
+            path.name
+            for path in _WORKFLOWS.glob("*.yml")
+            if re.search(
+                r"(?m)^\s*(?:docker push\b|uses:\s*docker/build-push-action@)",
+                path.read_text(encoding="utf-8"),
+            )
+        )
+        assert publishers == ["docker-publish.yml"], (
+            f"{publishers}: image pushes must go through the canonical workflow to avoid "
+            "racing tags and bypassing image signing and scanning"
+        )
+
 
 class TestUpstreamComposeImagesArePinned:
     def test_every_non_ghcr_image_carries_a_release_tag(self):
