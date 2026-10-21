@@ -162,7 +162,9 @@ RUN sed -i \
 
 RUN mkdir -p /var/cache/nginx /var/run && \
     touch /var/run/nginx.pid && \
-    chown -R ${APP_UID}:${APP_GID} /usr/share/nginx/html /usr/share/nginx/drawio /var/cache/nginx /var/log/nginx /run
+    chown -R ${APP_UID}:${APP_GID} /usr/share/nginx/html /usr/share/nginx/drawio /var/cache/nginx /var/log/nginx /run && \
+    chgrp -R 0 /usr/share/nginx/html /usr/share/nginx/drawio /var/cache/nginx /var/log/nginx /run && \
+    chmod -R g=u /usr/share/nginx/html /usr/share/nginx/drawio /var/cache/nginx /var/log/nginx /run
 
 USER ${APP_UID}:${APP_GID}
 
@@ -911,7 +913,9 @@ RUN mkdir -p /etc/nginx/templates /etc/nginx/turboea-templates /var/cache/nginx 
     rm -f /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh && \
     sed -i '/^user\s\+/d' /etc/nginx/nginx.conf && \
     chmod 755 /usr/local/bin/turboea-nginx-entrypoint && \
-    chown -R ${APP_UID}:${APP_GID} /etc/nginx/conf.d /etc/nginx/turboea-templates /etc/nginx/templates /var/cache/nginx /var/log/nginx /run
+    chown -R ${APP_UID}:${APP_GID} /etc/nginx/conf.d /etc/nginx/turboea-templates /etc/nginx/templates /var/cache/nginx /var/log/nginx /run && \
+    chgrp -R 0 /etc/nginx/conf.d /etc/nginx/turboea-templates /etc/nginx/templates /var/cache/nginx /var/log/nginx /run /var/run/nginx.pid && \
+    chmod -R g=u /etc/nginx/conf.d /etc/nginx/turboea-templates /etc/nginx/templates /var/cache/nginx /var/log/nginx /run /var/run/nginx.pid
 
 USER ${APP_UID}:${APP_GID}
 
