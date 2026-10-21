@@ -1,0 +1,30 @@
+name: Publish frontend and nginx images (fork)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [frontend, nginx]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build and publish ${{ matrix.image }}
+        run: |-
+          REPO="ghcr.io/${GITHUB_REPOSITORY,,}/${{ matrix.image }}"
+          docker build --target ${{ matrix.image }} -t "$REPO:${GITHUB_SHA::7}" -t "$REPO:latest" .
+          docker push "$REPO:${GITHUB_SHA::7}"
+          docker push "$REPO:latest"
